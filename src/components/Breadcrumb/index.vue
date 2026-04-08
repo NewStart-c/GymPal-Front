@@ -33,9 +33,9 @@ function getBreadcrumb() {
     matched = route.matched.filter((item) => item.meta && item.meta.title)
   }
   // 判断是否为首页
-  if (!isDashboard(matched[0])) {
-    matched = [{ path: "/index", meta: { title: "首页" } }].concat(matched)
-  }
+  // if (!isDashboard(matched[0])) {
+  //   matched = [{ path: "/index", meta: { title: "首页" } }].concat(matched)
+  // }
   levelList.value = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
 }
 function findPathNum(str, char = "/") {

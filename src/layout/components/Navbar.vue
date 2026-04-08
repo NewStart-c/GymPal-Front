@@ -1,33 +1,44 @@
 <template>
   <div class="navbar">
     <hamburger id="hamburger-container" :is-active="appStore.sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
-    <breadcrumb v-if="!settingsStore.topNav" id="breadcrumb-container" class="breadcrumb-container" />
     <top-nav v-if="settingsStore.topNav" id="topmenu-container" class="topmenu-container" />
+
+
 
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
-        <header-search id="header-search" class="right-menu-item" />
+<!--        <header-search id="header-search" class="right-menu-item" />-->
 
-        <el-tooltip content="源码地址" effect="dark" placement="bottom">
-          <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <el-tooltip content="文档地址" effect="dark" placement="bottom">
-          <ruo-yi-doc id="ruoyi-doc" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <screenfull id="screenfull" class="right-menu-item hover-effect" />
-
-        <el-tooltip content="主题模式" effect="dark" placement="bottom">
-          <div class="right-menu-item hover-effect theme-switch-wrapper" @click="toggleTheme">
-            <svg-icon v-if="settingsStore.isDark" icon-class="sunny" />
-            <svg-icon v-if="!settingsStore.isDark" icon-class="moon" />
+        <div class="middle-menu">
+          <div class="middle-button">
+            <el-button class="button-left">新增会员</el-button>
+            <el-button class="button-right">快速收银</el-button>
           </div>
-        </el-tooltip>
+        </div>
 
-        <el-tooltip content="布局大小" effect="dark" placement="bottom">
-          <size-select id="size-select" class="right-menu-item hover-effect" />
-        </el-tooltip>
+<!--        <el-tooltip content="源码地址" effect="dark" placement="bottom">-->
+<!--          <ruo-yi-git class="right-menu-item hover-effect" />-->
+<!--        </el-tooltip>-->
+
+<!--        <el-tooltip content="文档地址" effect="dark" placement="bottom">-->
+<!--          <ruo-yi-doc class="right-menu-item hover-effect" />-->
+<!--        </el-tooltip>-->
+
+<!--        <screenfull id="screenfull" class="right-menu-item hover-effect" />-->
+
+<!--        <el-tooltip content="主题模式" effect="dark" placement="bottom">-->
+<!--          <div class="right-menu-item hover-effect theme-switch-wrapper" @click="toggleTheme">-->
+<!--            <svg-icon v-if="settingsStore.isDark" icon-class="sunny" />-->
+<!--            <svg-icon v-if="!settingsStore.isDark" icon-class="moon" />-->
+<!--          </div>-->
+<!--        </el-tooltip>-->
+
+<!--        <el-tooltip content="布局大小" effect="dark" placement="bottom">-->
+<!--          <size-select id="size-select" class="right-menu-item hover-effect" />-->
+<!--        </el-tooltip>-->
+
+
+
       </template>
 
       <el-dropdown @command="handleCommand" class="avatar-container right-menu-item hover-effect" trigger="hover">
@@ -50,6 +61,17 @@
         </template>
       </el-dropdown>
     </div>
+
+
+
+  </div>
+
+  <div class="new-breadcrumb">
+    <i
+        class="el-icon-location-outline"
+        style="margin-left: 20px; margin-top: 16px"
+    ></i>
+    <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
   </div>
 </template>
 
@@ -112,7 +134,8 @@ function toggleTheme() {
 
 <style lang='scss' scoped>
 .navbar {
-  height: 50px;
+  padding-top: 10px;
+  height: 70px;
   overflow: hidden;
   position: relative;
   background: var(--navbar-bg);
@@ -145,6 +168,7 @@ function toggleTheme() {
     vertical-align: top;
   }
 
+
   .right-menu {
     float: right;
     height: 100%;
@@ -155,9 +179,13 @@ function toggleTheme() {
       outline: none;
     }
 
+    .middle-menu{
+      height: 100%;
+    }
+
     .right-menu-item {
       display: inline-block;
-      padding: 0 8px;
+      padding: 0 18px;
       height: 100%;
       font-size: 18px;
       color: #5a5e66;
@@ -178,7 +206,7 @@ function toggleTheme() {
 
         svg {
           transition: transform 0.3s;
-          
+
           &:hover {
             transform: scale(1.15);
           }
@@ -220,6 +248,16 @@ function toggleTheme() {
         }
       }
     }
+  }
+
+  .new-breadcrumb {
+    height: 50px;
+    background: rgb(240, 241, 243);
+    display: flex;
+  }
+  .navbar {
+    height: 100px;
+
   }
 }
 </style>

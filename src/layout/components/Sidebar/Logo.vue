@@ -42,7 +42,7 @@ const getLogoTextColor = computed(() => {
   if (settingsStore.isDark) {
     return 'var(--sidebar-text)'
   }
-  return sideTheme.value === 'theme-dark' ? '#fff' : variables.menuLightText
+  return sideTheme.value === 'theme-dark' ? '#000000' : variables.menuLightText
 })
 </script>
 

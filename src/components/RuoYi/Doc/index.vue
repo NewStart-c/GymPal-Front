@@ -5,7 +5,8 @@
 </template>
 
 <script setup>
-const url = ref('http://doc.ruoyi.vip/ruoyi-vue')
+const url = ref('https://github.com/NewStart-c/GymPal-Front')
+// 暂无
 
 function goto() {
   window.open(url.value)
