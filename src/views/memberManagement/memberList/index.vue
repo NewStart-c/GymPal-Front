@@ -201,10 +201,10 @@
         </el-form-item>
         <el-form-item label="会员等级" prop="memberLevelId">
           <el-select v-model="form.memberLevelId" placeholder="请选择会员等级">
-            <el-option label="金卡会员" value="1" />
+            <el-option label="金卡会员" value="3" />
             <el-option label="银卡会员" value="2" />
-            <el-option label="钻石会员" value="3" />
-            <el-option label="普通会员" value="4"/>
+            <el-option label="钻石会员" value="4" />
+            <el-option label="普通会员" value="1" />
           </el-select>
         </el-form-item>
         <el-form-item label="储值余额" prop="currentBalance">
@@ -468,10 +468,10 @@ function handleJump() {
 // 获取会员等级标签类型
 function getLevelTagType(levelId) {
   const typeMap = {
-    1: "warning", // 金卡会员-黄色
+    3: "warning", // 金卡会员-黄色
     2: "info",    // 银卡会员-灰色
-    3: "purple",  // 钻石会员-紫色
-    4: "primary"  // 普通会员-蓝色
+    4: "primary",  // 钻石会员-紫色
+    1: "purple"  // 普通会员-蓝色
   }
   return typeMap[levelId] || "default"
 }
@@ -479,10 +479,10 @@ function getLevelTagType(levelId) {
 // 获取会员等级名称
 function getLevelName(levelId) {
   const nameMap = {
-    1: "金卡会员",
+    3: "金卡会员",
     2: "银卡会员",
-    3: "钻石会员",
-    4: "普通会员"
+    4: "钻石会员",
+    1: "普通会员"
   }
   return nameMap[levelId] || "未知等级"
 }
