@@ -3,27 +3,26 @@
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="等级名称" prop="levelName">
         <el-input
-          v-model="queryParams.levelName"
-          placeholder="请输入等级名称"
-          clearable
-          @keyup.enter="handleQuery"
+            v-model="queryParams.levelName"
+            placeholder="请输入等级名称"
+            clearable
+            @keyup.enter="handleQuery"
         />
       </el-form-item>
-
       <el-form-item label="等级描述" prop="description">
         <el-input
-          v-model="queryParams.description"
-          placeholder="请输入等级描述"
-          clearable
-          @keyup.enter="handleQuery"
+            v-model="queryParams.description"
+            placeholder="请输入等级描述"
+            clearable
+            @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="折扣率" prop="discountRate">
         <el-input
-          v-model="queryParams.discountRate"
-          placeholder="请输入折扣率"
-          clearable
-          @keyup.enter="handleQuery"
+            v-model="queryParams.discountRate"
+            placeholder="请输入折扣率"
+            clearable
+            @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
@@ -35,40 +34,40 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['memberManagement:mamberLevel:add']"
+            type="primary"
+            plain
+            icon="Plus"
+            @click="handleAdd"
+            v-hasPermi="['memberManagement:mamberLevel:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['memberManagement:mamberLevel:edit']"
+            type="success"
+            plain
+            icon="Edit"
+            :disabled="single"
+            @click="handleUpdate"
+            v-hasPermi="['memberManagement:mamberLevel:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['memberManagement:mamberLevel:remove']"
+            type="danger"
+            plain
+            icon="Delete"
+            :disabled="multiple"
+            @click="handleDelete"
+            v-hasPermi="['memberManagement:mamberLevel:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['memberManagement:mamberLevel:export']"
+            type="warning"
+            plain
+            icon="Download"
+            @click="handleExport"
+            v-hasPermi="['memberManagement:mamberLevel:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -77,24 +76,10 @@
     <el-table v-loading="loading" :data="mamberLevelList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="等级ID" align="center" prop="levelId" />
-      <el-table-column label="等级名称" align="center" prop="levelName">
-        <template #default="scope">
-          <el-tag :type="getLevelTagType(scope.row.levelName)">{{ scope.row.levelName }}</el-tag>
-        </template>
-      </el-table-column>
+      <el-table-column label="等级名称" align="center" prop="levelName" />
       <el-table-column label="等级描述" align="center" prop="description" />
       <el-table-column label="折扣率" align="center" prop="discountRate" />
-      <el-table-column label="权益列表(JSON格式)" align="center" prop="benefits">
-        <template #default="scope">
-          <div
-              v-for="(item, index) in JSON.parse(scope.row.benefits)"
-              :key="index"
-              style="line-height: 1.8; margin: 2px 0;"
-          >
-            • {{ item }}
-          </div>
-        </template>
-      </el-table-column>
+      <el-table-column label="权益列表(JSON格式)" align="center" prop="benefits" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -105,23 +90,18 @@
     </el-table>
 
     <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
+        v-show="total>0"
+        :total="total"
+        v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getList"
     />
 
     <!-- 添加或修改会员等级对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="mamberLevelRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="会员等级" prop="memberLevelId">
-          <el-select v-model="form.levelName" placeholder="请选择会员等级">
-            <el-option label="普通会员" value="普通会员" />
-            <el-option label="银卡会员" value="银卡会员" />
-            <el-option label="金卡会员" value="金卡会员" />
-            <el-option label="钻石会员" value="钻石会员" />
-          </el-select>
+        <el-form-item label="等级名称" prop="levelName">
+          <el-input v-model="form.levelName" placeholder="请输入等级名称" />
         </el-form-item>
         <el-form-item label="等级描述" prop="description">
           <el-input v-model="form.description" placeholder="请输入等级描述" />
@@ -287,17 +267,6 @@ function handleExport() {
   proxy.download('memberManagement/mamberLevel/export', {
     ...queryParams.value
   }, `mamberLevel_${new Date().getTime()}.xlsx`)
-}
-
-// 获取会员等级标签类型
-function getLevelTagType(levelId) {
-  const typeMap = {
-    "普通会员": "purple",  // 钻石会员-紫色
-    "银卡会员": "info",    // 银卡会员-灰色
-    "金卡会员": "warning", // 金卡会员-黄色
-    "钻石会员": "primary"  // 普通会员-蓝色
-  }
-  return typeMap[levelId] || "default"
 }
 
 getList()
