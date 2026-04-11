@@ -108,7 +108,24 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="产品图集地址列表" align="center" prop="imageUrls" />
+      <el-table-column label="商品图片" align="center" width="120">
+        <template #default="scope">
+          <div v-if="scope.row.imageUrls" style="display: flex; align-items: center; gap: 6px;">
+            <!-- 正方形图片容器 -->
+            <div style="width: 45px; height: 45px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+              <img
+                  :src="'/dev-api' + scope.row.imageUrls.split(',')[0]"
+                  style="width: 100%; height: 100%; object-fit: cover;"
+              >
+            </div>
+
+            <span v-if="scope.row.imageUrls.split(',').length > 1">
+        +{{ scope.row.imageUrls.split(',').length - 1 }}张
+      </span>
+          </div>
+          <span v-else>无图片</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['productManagement:product:edit']">修改</el-button>
@@ -152,8 +169,21 @@
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="产品图集地址列表" prop="imageUrls">
-          <el-input v-model="form.imageUrls" type="textarea" placeholder="请输入内容" />
+        <el-form-item label="商品图集">
+          <el-upload
+              class="upload-avatar"
+              :action="uploadUrl"
+              :headers="headers"
+              list-type="picture-card"
+              :on-success="handleUploadSuccess"
+              :on-remove="handleUploadRemove"
+              :file-list="fileList"
+          >
+            <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+          <div style="margin-top:10px;color:#999;font-size:12px">
+            可上传多张图片，自动保存为逗号分隔地址
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -168,6 +198,12 @@
 
 <script setup name="Product">
 import { listProduct, getProduct, delProduct, addProduct, updateProduct } from "@/api/productManagement/product"
+import { getToken } from '@/utils/auth'
+
+// 图片上传
+const uploadUrl = import.meta.env.VITE_APP_BASE_API + '/productManagement/product/image/upload'
+const headers = { Authorization: 'Bearer ' + getToken() }
+const fileList = ref([])
 
 const { proxy } = getCurrentInstance()
 const { product_status } = proxy.useDict('product_status')
@@ -208,6 +244,34 @@ const data = reactive({
 })
 
 const { queryParams, form, rules } = toRefs(data)
+
+// 上传成功
+function handleUploadSuccess(response) {
+  const url = response.data
+  // 追加到 fileList
+  fileList.value.push({ url })
+  // 拼接成逗号分隔字符串存入 form.imageUrls
+  const urls = fileList.value.map(item => item.url)
+  form.value.imageUrls = urls.join(',')
+}
+
+// 删除图片
+function handleUploadRemove(file) {
+  const urls = fileList.value
+      .filter(item => item.url !== file.url)
+      .map(item => item.url)
+  form.value.imageUrls = urls.join(',')
+}
+
+// 回显图片（修改时调用）
+function setFileListByImageUrls(imageUrls) {
+  fileList.value = []
+  if (!imageUrls) return
+  const urls = imageUrls.split(',')
+  urls.forEach(url => {
+    fileList.value.push({ url })
+  })
+}
 
 /** 查询商品管理列表 */
 function getList() {
@@ -273,9 +337,13 @@ function handleAdd() {
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset()
-  const _productId = row.productId || ids.value
-  getProduct(_productId).then(response => {
+  const productId = row.productId || ids.value
+  getProduct(productId).then(response => {
     form.value = response.data
+
+    // ===== 回显多图 =====
+    setFileListByImageUrls(response.data.imageUrls)
+
     open.value = true
     title.value = "修改商品管理"
   })
@@ -322,3 +390,15 @@ function handleExport() {
 
 getList()
 </script>
+
+<style scoped>
+.upload-avatar :deep(.el-upload--picture-card) {
+  width: 80px;
+  height: 80px;
+  line-height: 88px;
+}
+.avatar-uploader-icon {
+  font-size: 24px;
+  color: #8c939d;
+}
+</style>
