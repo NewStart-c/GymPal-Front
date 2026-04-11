@@ -119,7 +119,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="课程ID" align="center" prop="courseId" />
       <el-table-column label="课程名称" align="center" prop="courseName" />
-      <el-table-column label="(课程类型关联dict_type)" align="center" prop="courseType">
+      <el-table-column label="课程类型关联" align="center" prop="courseType">
         <template #default="scope">
           <dict-tag :options="course_type" :value="scope.row.courseType ? scope.row.courseType.split(',') : []"/>
         </template>
@@ -138,14 +138,32 @@
       <el-table-column label="地点" align="center" prop="location" />
       <el-table-column label="最大容量" align="center" prop="maxCapacity" />
       <el-table-column label="当前报名人数" align="center" prop="currentEnrollment" />
-      <el-table-column label="状态(0待开始 1进行中 2已结束)" align="center" prop="status">
+      <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :options="course_status" :value="scope.row.status"/>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column
+          label="备注"
+          align="center"
+          prop="remark"
+      >
+        <template #default="scope">
+          <div
+              style="
+        max-height: 60px;
+        overflow-y: auto;
+        white-space: normal;
+        line-height: 20px;
+      "
+          >
+            {{ scope.row.remark }}
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <el-button link type="primary" icon="View" @click="handleView(scope.row)">查看</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['courseManagement:course:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['courseManagement:course:remove']">删除</el-button>
         </template>
@@ -166,7 +184,7 @@
         <el-form-item label="课程名称" prop="courseName">
           <el-input v-model="form.courseName" placeholder="请输入课程名称" />
         </el-form-item>
-        <el-form-item label="(课程类型关联dict_type)" prop="courseType">
+        <el-form-item label="课程类型关联" prop="courseType">
           <el-checkbox-group v-model="form.courseType">
             <el-checkbox
               v-for="dict in course_type"
@@ -204,7 +222,7 @@
         <el-form-item label="当前报名人数" prop="currentEnrollment">
           <el-input v-model="form.currentEnrollment" placeholder="请输入当前报名人数" />
         </el-form-item>
-        <el-form-item label="状态(0待开始 1进行中 2已结束)" prop="status">
+        <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
             <el-radio
               v-for="dict in course_status"
@@ -338,6 +356,17 @@ function handleAdd() {
   reset()
   open.value = true
   title.value = "添加课程信息"
+}
+
+// 新增：查看课程详情
+function handleView(row) {
+  // 跳转到课程详情页，传递courseId
+  proxy.$router.push({
+    path: '/courseManagement/course/detail',
+    query: {
+      courseId: row.courseId
+    }
+  })
 }
 
 /** 修改按钮操作 */

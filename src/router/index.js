@@ -97,6 +97,32 @@ export const constantRoutes = [
         meta: { title: '会员详情' }
       }
     ]
+  },
+  {
+    path: '/courseManagement',
+    component: Layout,
+    redirect: '/courseManagement/course',
+    name: 'CourseManagement',
+    meta: { title: '课程管理', icon: 'education' },
+    children: [
+
+      // 新增课程详情路由
+      {
+        path: 'course/detail',
+        component: () => import('@/views/courseManagement/course/detail'),
+        name: 'CourseDetail',
+        meta: { title: '课程详情', activeMenu: '/courseManagement/course' },
+        hidden: true
+      },
+      // // 编辑课程路由
+      // {
+      //   path: 'course/edit',
+      //   component: () => import('@/views/courseManagement/course/edit'),
+      //   name: 'CourseEdit',
+      //   meta: { title: '编辑课程', activeMenu: '/courseManagement/course' },
+      //   hidden: true
+      // }
+    ]
   }
 ]
 
