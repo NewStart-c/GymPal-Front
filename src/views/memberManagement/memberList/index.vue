@@ -378,10 +378,9 @@ function handleAdd() {
   title.value = "添加会员"
 }
 
-/** 查看会员 */
+// 查看会员
 function handleView(row) {
-  // 可扩展查看详情逻辑
-  ElMessage.info("查看会员详情功能待实现")
+  proxy.$router.push(`/memberManagement/memberList/detail/${row.memberId}`);
 }
 
 /** 修改按钮操作 */

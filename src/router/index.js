@@ -83,6 +83,20 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/memberManagement',
+    component: Layout,
+    children: [
+
+      {
+        path: 'memberList/detail/:memberId',
+        component: () => import('@/views/memberManagement/memberList/detail'),
+        name: 'MemberDetail',
+        hidden: true,
+        meta: { title: '会员详情' }
+      }
+    ]
   }
 ]
 
