@@ -42,3 +42,40 @@ export function delCourse(courseId) {
     method: 'delete'
   })
 }
+
+// 1. 查询课程统计数据（仪表盘表格）
+export function getCourseStatistics(query) {
+  return request({
+    url: '/courseManagement/course/getCourseStatistics',
+    method: 'get',
+    params: query
+  })
+}
+
+// 2. 查询热门课程排名（报表页）
+export function getHotCourseRank(query) {
+  return request({
+    url: '/courseManagement/course/getHotCourseRank',
+    method: 'get',
+    params: query
+  })
+}
+
+// 3. 查询课程预约趋势（报表页）
+export function getReservationTrend(query) {
+  return request({
+    url: '/courseManagement/course/getReservationTrend',
+    method: 'get',
+    params: query
+  })
+}
+
+// 4. 查询课程类型收入占比（报表页/仪表盘饼图）
+export function getCourseIncomeType(query) {
+  return request({
+    url: '/courseManagement/course/getCourseIncomeType',
+    method: 'get',
+    params: query
+  })
+}
+

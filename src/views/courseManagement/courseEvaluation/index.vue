@@ -54,7 +54,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['courseManagement:courseManagement:add']"
+          v-hasPermi="['courseManagement:courseEvaluation:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -64,7 +64,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['courseManagement:courseManagement:edit']"
+          v-hasPermi="['courseManagement:courseEvaluation:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -74,7 +74,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['courseManagement:courseManagement:remove']"
+          v-hasPermi="['courseManagement:courseEvaluation:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -83,13 +83,13 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['courseManagement:courseManagement:export']"
+          v-hasPermi="['courseManagement:courseEvaluation:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="courseManagementList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="courseEvaluationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="评价ID" align="center" prop="evaluationId" />
       <el-table-column label="课程ID" align="center" prop="courseId" />
@@ -105,8 +105,8 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['courseManagement:courseManagement:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['courseManagement:courseManagement:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['courseManagement:courseEvaluation:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['courseManagement:courseEvaluation:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -121,7 +121,7 @@
 
     <!-- 添加或修改课程评价对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="courseManagementRef" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="courseEvaluationRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="课程ID" prop="courseId">
           <el-input v-model="form.courseId" placeholder="请输入课程ID" />
         </el-form-item>
@@ -159,12 +159,12 @@
   </div>
 </template>
 
-<script setup name="CourseManagement">
-import { listCourseManagement, getCourseManagement, delCourseManagement, addCourseManagement, updateCourseManagement } from "@/api/courseManagement/courseManagement"
+<script setup name="CourseEvaluation">
+import { listCourseEvaluation, getCourseEvaluation, delCourseEvaluation, addCourseEvaluation, updateCourseEvaluation } from "@/api/courseManagement/courseEvaluation"
 
 const { proxy } = getCurrentInstance()
 
-const courseManagementList = ref([])
+const courseEvaluationList = ref([])
 const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
@@ -207,8 +207,8 @@ const { queryParams, form, rules } = toRefs(data)
 /** 查询课程评价列表 */
 function getList() {
   loading.value = true
-  listCourseManagement(queryParams.value).then(response => {
-    courseManagementList.value = response.rows
+  listCourseEvaluation(queryParams.value).then(response => {
+    courseEvaluationList.value = response.rows
     total.value = response.total
     loading.value = false
   })
@@ -236,7 +236,7 @@ function reset() {
     updateTime: null,
     remark: null
   }
-  proxy.resetForm("courseManagementRef")
+  proxy.resetForm("courseEvaluationRef")
 }
 
 /** 搜索按钮操作 */
@@ -269,7 +269,7 @@ function handleAdd() {
 function handleUpdate(row) {
   reset()
   const _evaluationId = row.evaluationId || ids.value
-  getCourseManagement(_evaluationId).then(response => {
+  getCourseEvaluation(_evaluationId).then(response => {
     form.value = response.data
     open.value = true
     title.value = "修改课程评价"
@@ -278,16 +278,16 @@ function handleUpdate(row) {
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["courseManagementRef"].validate(valid => {
+  proxy.$refs["courseEvaluationRef"].validate(valid => {
     if (valid) {
       if (form.value.evaluationId != null) {
-        updateCourseManagement(form.value).then(response => {
+        updateCourseEvaluation(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功")
           open.value = false
           getList()
         })
       } else {
-        addCourseManagement(form.value).then(response => {
+        addCourseEvaluation(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功")
           open.value = false
           getList()
@@ -301,7 +301,7 @@ function submitForm() {
 function handleDelete(row) {
   const _evaluationIds = row.evaluationId || ids.value
   proxy.$modal.confirm('是否确认删除课程评价编号为"' + _evaluationIds + '"的数据项？').then(function() {
-    return delCourseManagement(_evaluationIds)
+    return delCourseEvaluation(_evaluationIds)
   }).then(() => {
     getList()
     proxy.$modal.msgSuccess("删除成功")
@@ -310,9 +310,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('courseManagement/courseManagement/export', {
+  proxy.download('courseManagement/courseEvaluation/export', {
     ...queryParams.value
-  }, `courseManagement_${new Date().getTime()}.xlsx`)
+  }, `courseEvaluation_${new Date().getTime()}.xlsx`)
 }
 
 getList()
