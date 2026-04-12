@@ -1,8 +1,5 @@
 <template>
   <div class="app-container">
-
-
-
     <!-- 主体布局：商品列表 + 购物车/支付 -->
     <el-row :gutter="20">
 
