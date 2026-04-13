@@ -32,7 +32,8 @@ const init = () => {
     series: [{
       data: values,
       type: 'bar',
-      itemStyle: { color: '#409EFF' }
+      itemStyle: { color: '#409EFF' },
+      barWidth: '20%'   // 控制柱子宽度
     }]
   }
   chart.setOption(option)
