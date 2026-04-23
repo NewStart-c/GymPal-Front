@@ -17,8 +17,8 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="类型(0充值 1消费)" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择类型(0充值 1消费)" clearable>
+      <el-form-item label="类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择类型" clearable>
           <el-option
             v-for="dict in recharge_record_type"
             :key="dict.value"
@@ -143,7 +143,7 @@
           <el-input v-model="form.amount" placeholder="请输入金额" />
         </el-form-item>
         <el-form-item label="类型(0充值 1消费)" prop="type">
-          <el-select v-model="form.type" placeholder="请选择类型(0充值 1消费)">
+          <el-select v-model="form.type" placeholder="请选择类型">
             <el-option
               v-for="dict in recharge_record_type"
               :key="dict.value"

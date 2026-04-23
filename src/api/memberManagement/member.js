@@ -42,3 +42,13 @@ export function delMember(memberId) {
     method: 'delete'
   })
 }
+
+
+// 会员充值
+export function memberRecharge(data) {
+  return request({
+    url: '/memberManagement/member/recharge',
+    method: 'put',
+    data: data
+  })
+}

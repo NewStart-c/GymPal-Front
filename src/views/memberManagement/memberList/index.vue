@@ -42,10 +42,10 @@
       <el-form-item>
         <el-select v-model="queryParams.memberLevelId" placeholder="全部等级" clearable style="width: 120px;">
           <el-option label="全部等级" value="" />
-          <el-option label="金卡会员" value="1" />
+          <el-option label="金卡会员" value="3" />
           <el-option label="银卡会员" value="2" />
-          <el-option label="钻石会员" value="3" />
-          <el-option label="普通会员" value="4" />
+          <el-option label="钻石会员" value="4" />
+          <el-option label="普通会员" value="1" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -83,21 +83,21 @@
                         placeholder="请选择生日">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="注册日期" prop="registrationDate">
-        <el-date-picker clearable
-                        v-model="advancedParams.registrationDate"
-                        type="date"
-                        value-format="YYYY-MM-DD"
-                        placeholder="请选择注册日期">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="储值余额" prop="currentBalance">
-        <el-input
-            v-model="advancedParams.currentBalance"
-            placeholder="请输入储值余额"
-            clearable
-        />
-      </el-form-item>
+<!--      <el-form-item label="注册日期" prop="registrationDate">-->
+<!--        <el-date-picker clearable-->
+<!--                        v-model="advancedParams.registrationDate"-->
+<!--                        type="date"-->
+<!--                        value-format="YYYY-MM-DD"-->
+<!--                        placeholder="请选择注册日期">-->
+<!--        </el-date-picker>-->
+<!--      </el-form-item>-->
+<!--      <el-form-item label="储值余额" prop="currentBalance">-->
+<!--        <el-input-->
+<!--            v-model="advancedParams.currentBalance"-->
+<!--            placeholder="请输入储值余额"-->
+<!--            clearable-->
+<!--        />-->
+<!--      </el-form-item>-->
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleAdvancedQuery">查询</el-button>
         <el-button icon="Refresh" @click="resetAdvancedQuery">重置</el-button>
@@ -135,7 +135,7 @@
           <el-button link type="primary" icon="View" size="small" @click="handleView(scope.row)">查看</el-button>
           <el-button link type="primary" icon="Edit" size="small" @click="handleUpdate(scope.row)" v-hasPermi="['memberManagement:member:edit']">编辑</el-button>
           <el-button link type="danger" icon="Delete" size="small" @click="handleDelete(scope.row)" v-hasPermi="['memberManagement:member:remove']">删除</el-button>
-          <el-button link type="success" icon="Money" size="small">充值</el-button>
+          <el-button link type="success" icon="Money" size="small" @click="handleRecharge(scope.row)">充值</el-button>
           <el-button link type="info" icon="Ticket" size="small">消费</el-button>
         </template>
       </el-table-column>
@@ -181,7 +181,11 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="手机号码" prop="phoneNumber">
-          <el-input v-model="form.phoneNumber" placeholder="请输入手机号码" />
+          <el-input
+              v-model="form.phoneNumber"
+              placeholder="请输入手机号码"
+              @blur="checkPhoneExists(form.phoneNumber, form.memberId)"
+          />
         </el-form-item>
         <el-form-item label="生日" prop="birthday">
           <el-date-picker clearable
@@ -191,14 +195,14 @@
                           placeholder="请选择生日">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="注册日期" prop="registrationDate">
-          <el-date-picker clearable
-                          v-model="form.registrationDate"
-                          type="date"
-                          value-format="YYYY-MM-DD"
-                          placeholder="请选择注册日期">
-          </el-date-picker>
-        </el-form-item>
+<!--        <el-form-item label="注册日期" prop="registrationDate">-->
+<!--          <el-date-picker clearable-->
+<!--                          v-model="form.registrationDate"-->
+<!--                          type="date"-->
+<!--                          value-format="YYYY-MM-DD"-->
+<!--                          placeholder="请选择注册日期">-->
+<!--          </el-date-picker>-->
+<!--        </el-form-item>-->
         <el-form-item label="会员等级" prop="memberLevelId">
           <el-select v-model="form.memberLevelId" placeholder="请选择会员等级">
             <el-option label="金卡会员" value="3" />
@@ -207,9 +211,9 @@
             <el-option label="普通会员" value="1" />
           </el-select>
         </el-form-item>
-        <el-form-item label="储值余额" prop="currentBalance">
-          <el-input v-model="form.currentBalance" placeholder="请输入储值余额" prefix="¥" />
-        </el-form-item>
+<!--        <el-form-item label="储值余额" prop="currentBalance">-->
+<!--          <el-input v-model="form.currentBalance" placeholder="请输入储值余额" prefix="¥" />-->
+<!--        </el-form-item>-->
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
             <el-radio label="0">正常</el-radio>
@@ -228,11 +232,49 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- ====================== 充值弹窗 ====================== -->
+    <el-dialog title="会员储值充值" v-model="rechargeOpen" width="460px" append-to-body>
+      <el-form ref="rechargeRef" :model="rechargeForm" :rules="rechargeRules" label-width="80px">
+        <el-form-item label="会员ID">
+          <span class="text-bold">{{ rechargeForm.memberId }}</span>
+        </el-form-item>
+        <el-form-item label="会员姓名">
+          <span class="text-bold">{{ rechargeForm.name }}</span>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <span class="text-bold">{{ rechargeForm.phoneNumber }}</span>
+        </el-form-item>
+        <el-form-item label="当前余额">
+          <span class="text-bold text-red">¥{{ Number(rechargeForm.currentBalance).toFixed(2) }}</span>
+        </el-form-item>
+
+        <el-form-item label="充值金额" prop="rechargeAmount">
+          <el-input
+              v-model.number="rechargeForm.rechargeAmount"
+              placeholder="请输入充值金额"
+              prefix="¥"
+              type="number"
+              :min="0.01"
+          />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="rechargeForm.remark" type="textarea" placeholder="充值备注（选填）" />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="submitRecharge">确认充值</el-button>
+          <el-button @click="rechargeOpen = false">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="Member">
-import { listMember, getMember, delMember, addMember, updateMember } from "@/api/memberManagement/member"
+import { listMember, getMember, delMember, addMember, updateMember, memberRecharge } from "@/api/memberManagement/member"
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
@@ -296,9 +338,7 @@ const rules = reactive({
     { required: true, message: "手机号码不能为空", trigger: "blur" },
     { pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号码", trigger: "blur" }
   ],
-  registrationDate: [
-    { required: true, message: "注册日期不能为空", trigger: "blur" }
-  ],
+
   memberLevelId: [
     { required: true, message: "会员等级不能为空", trigger: "blur" }
   ]
@@ -408,23 +448,48 @@ function cancel() {
   resetForm()
 }
 
+// 检查手机号是否已存在（排除自身ID）
+function checkPhoneExists(phone, memberId) {
+  return new Promise((resolve, reject) => {
+    listMember({
+      phoneNumber: phone,
+      excludeMemberId: memberId // 修改时排除自己
+    }).then(res => {
+      if (res.rows && res.rows.length > 0) {
+        ElMessage.error('该手机号码已被使用！')
+        resolve(false)
+      } else {
+        resolve(true)
+      }
+    }).catch(() => {
+      resolve(false)
+    })
+  })
+}
+
 /** 提交按钮 */
-function submitForm() {
+async function submitForm() {
   proxy.$refs["memberRef"].validate(valid => {
     if (valid) {
-      if (form.memberId != null) {
-        updateMember(form).then(response => {
-          proxy.$modal.msgSuccess("修改成功")
-          open.value = false
-          getList()
-        })
-      } else {
-        addMember(form).then(response => {
-          proxy.$modal.msgSuccess("新增成功")
-          open.value = false
-          getList()
-        })
-      }
+      // 手机号重复校验（核心）
+      checkPhoneExists(form.phoneNumber, form.memberId).then(ok => {
+        if (!ok) return
+
+        // 校验通过才提交
+        if (form.memberId != null) {
+          updateMember(form).then(response => {
+            proxy.$modal.msgSuccess("修改成功")
+            open.value = false
+            getList()
+          })
+        } else {
+          addMember(form).then(response => {
+            proxy.$modal.msgSuccess("新增成功")
+            open.value = false
+            getList()
+          })
+        }
+      })
     }
   })
 }
@@ -505,6 +570,54 @@ function getStatusName(status) {
   }
   return nameMap[status] || "未知状态"
 }
+
+// ====================== 充值相关 ======================
+const rechargeOpen = ref(false)
+const rechargeForm = reactive({
+  memberId: null,
+  name: null,
+  phoneNumber: null,
+  currentBalance: null,
+  rechargeAmount: null,
+  remark: "前台充值"
+})
+
+// 充值校验规则
+const rechargeRules = reactive({
+  rechargeAmount: [
+    { required: true, message: "请输入充值金额", trigger: "blur" },
+    { type: "number", min: 0.01, message: "充值金额必须大于0", trigger: "blur" }
+  ]
+})
+
+// 打开充值弹窗
+function handleRecharge(row) {
+  rechargeForm.memberId = row.memberId
+  rechargeForm.name = row.name
+  rechargeForm.phoneNumber = row.phoneNumber
+  rechargeForm.currentBalance = row.currentBalance
+  rechargeForm.rechargeAmount = null
+  rechargeForm.remark = "前台充值"
+  rechargeOpen.value = true
+}
+
+// 提交充值
+function submitRecharge() {
+  proxy.$refs["rechargeRef"].validate(valid => {
+    if (valid) {
+      proxy.$modal.confirm(`确认给【${rechargeForm.name}】充值 ¥${rechargeForm.rechargeAmount} 吗？`).then(() => {
+        // 调用充值接口
+        memberRecharge(rechargeForm).then(res => {
+          proxy.$modal.msgSuccess("充值成功")
+          rechargeOpen.value = false
+          getList() // 刷新列表
+        })
+      }).catch(() => {})
+    }
+  })
+}
+
+
 
 // 初始化查询列表
 getList()
