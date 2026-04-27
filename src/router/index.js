@@ -123,7 +123,48 @@ export const constantRoutes = [
       //   hidden: true
       // }
     ]
-  }
+  },
+  {
+    path: '/userMember',
+    component: Layout,
+    meta: { title: '会员中心' },
+    children: [
+      // 课程列表
+      {
+        path: 'myCourse',
+        name: 'MyCourse',
+        component: () => import('@/views/userMember/myCourse/index'),
+        meta: { title: '我的课程' }
+      },
+
+      {
+        path: 'myCourse/detail',
+        name: 'MemberCourseDetail',
+        component: () => import('@/views/userMember/myCourse/detail'),
+        hidden: true, // 隐藏，不出现在左侧菜单
+        meta: { title: '课程详情' }
+      },
+      {
+        path: 'myCourse/reservation',
+        name: 'MyReservation',  // 必须和跳转的 name 一样
+        component: () => import('@/views/userMember/myCourse/MyReservation'),
+        hidden: true
+      },
+      {
+        path: 'myCourse/pay',
+        name: 'CoursePay',
+        component: () => import('@/views/userMember/myCourse/pay'),
+        hidden: true
+      },
+      {
+        path: 'myCourse/evaluate',
+        name: 'CourseEvaluate',
+        component: () => import('@/views/userMember/myCourse/evaluate'),
+        hidden: true
+      }
+    ]
+  },
+
 ]
 
 // 动态路由，基于用户权限动态去加载

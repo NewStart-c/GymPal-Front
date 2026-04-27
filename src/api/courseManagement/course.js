@@ -1,5 +1,58 @@
 import request from '@/utils/request'
 
+
+
+// 预约课程
+export function reserveCourse(data) {
+  return request({
+    url: '/courseReservation/memberReserve',
+    method: 'post',
+    data: data
+  })
+}
+
+// 我的预约
+export function myReservation() {
+  return request({
+    url: '/courseReservation/myList',
+    method: 'get'
+  })
+}
+
+// 签到
+export function sign(id) {
+  return request({
+    url: '/courseReservation/sign/' + id,
+    method: 'post'
+  })
+}
+
+// 支付
+export function payCourse(data) {
+  return request({
+    url: '/courseOrder/memberPay',
+    method: 'post',
+    data: data
+  })
+}
+
+// 评价
+export function evaluateCourse(data) {
+  return request({
+    url: '/courseEvaluation/memberEvaluate',
+    method: 'post',
+    data: data
+  })
+}
+
+// 取消预约
+export function cancelCourse(id) {
+  return request({
+    url: '/courseReservation/cancel/' + id,
+    method: 'post'
+  })
+}
+
 // 查询课程信息列表
 export function listCourse(query) {
   return request({

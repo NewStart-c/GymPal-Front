@@ -119,7 +119,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="课程ID" align="center" prop="courseId" />
       <el-table-column label="课程名称" align="center" prop="courseName" />
-      <el-table-column label="课程类型关联" align="center" prop="courseType">
+      <el-table-column label="课程类型" align="center" prop="courseType">
         <template #default="scope">
           <dict-tag :options="course_type" :value="scope.row.courseType ? scope.row.courseType.split(',') : []"/>
         </template>
@@ -184,7 +184,7 @@
         <el-form-item label="课程名称" prop="courseName">
           <el-input v-model="form.courseName" placeholder="请输入课程名称" />
         </el-form-item>
-        <el-form-item label="课程类型关联" prop="courseType">
+        <el-form-item label="课程类型" prop="courseType">
           <el-checkbox-group v-model="form.courseType">
             <el-checkbox
               v-for="dict in course_type"
