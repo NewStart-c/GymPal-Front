@@ -37,6 +37,9 @@
 
 <script setup name="CourseEvaluate">
 import { evaluateCourse } from '@/api/member/course'
+import {getCourseReservation} from "@/api/courseManagement/courseReservation.js";
+import {getCourse} from "@/api/courseManagement/course.js";
+import { addEvaluation } from '@/api/trainerManagement/evaluation'
 const route = useRoute()
 const router = useRouter()
 const { proxy } = getCurrentInstance()
@@ -45,14 +48,44 @@ const resId = route.query.resId
 const courseScore = ref(5)
 const trainerScore = ref(5)
 const content = ref('')
+const courseInfo = ref({})
+const courseReservationInfo = ref({})
+const courseId = ref(null)
+
+onMounted(async () => {
+  try {
+    // 1. 先获取预约信息
+    const resRes = await getCourseReservation(resId)
+    courseReservationInfo.value = resRes.data
+
+    // 2. 拿到课程ID
+    courseId.value = courseReservationInfo.value.courseId
+
+    // 3. 再获取课程信息
+    const courseRes = await getCourse(courseId.value)
+    courseInfo.value = courseRes.data
+    console.log(courseInfo)
+  } catch (e) {
+    console.error("加载数据失败", e)
+  }
+})
 
 async function submit() {
   await evaluateCourse({
     reservationId: resId,
-    courseScore: courseScore.value,
-    trainerScore: trainerScore.value,
+    memberId:courseReservationInfo.value.memberId,
+    courseId:courseId.value,
+    score: courseScore.value,
     comment: content.value
   })
+
+  await addEvaluation({
+    trainerId:courseInfo.value.trainerId,
+    memberId:courseReservationInfo.value.memberId,
+    score:trainerScore,
+    comment: content.value
+  })
+
   proxy.$modal.msgSuccess('评价成功')
   router.push({ name: 'MyReservation' })
 }

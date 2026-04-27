@@ -17,17 +17,17 @@
           round
           :type="activeStatus === '0' ? 'primary' : 'default'"
           @click="switchStatus('0')"
-      >待签到</el-button>
+      >待支付</el-button>
       <el-button
           round
           :type="activeStatus === '1' ? 'primary' : 'default'"
           @click="switchStatus('1')"
-      >已签到</el-button>
+      >待签到</el-button>
       <el-button
           round
           :type="activeStatus === '2' ? 'primary' : 'default'"
           @click="switchStatus('2')"
-      >待支付/评价</el-button>
+      >已完成</el-button>
       <el-button
           round
           :type="activeStatus === '3' ? 'primary' : 'default'"
@@ -47,13 +47,13 @@
         <div class="card-body">
           <h3 class="course-title">{{ item.courseName }}</h3>
 
+<!--          <div class="info-line">-->
+<!--            <el-icon><Calendar /></el-icon>-->
+<!--            <span>{{ parseTime(item.reservationTime, '{y}-{m}-{d}') }}</span>-->
+<!--          </div>-->
           <div class="info-line">
             <el-icon><Calendar /></el-icon>
-            <span>{{ parseTime(item.reservationTime, '{y}-{m}-{d}') }}</span>
-          </div>
-          <div class="info-line">
-            <el-icon><Clock /></el-icon>
-            <span>{{ parseTime(item.startTime, '{h}:{i}') }} - {{ parseTime(item.endTime, '{h}:{i}') }}</span>
+            <span>{{ parseTime(item.startTime, '{m}-{d}') }} ---- {{ parseTime(item.endTime, '{m}-{d}') }}</span>
           </div>
           <div class="info-line">
             <el-icon><Location /></el-icon>
@@ -61,13 +61,24 @@
           </div>
           <div class="info-line">
             <el-icon><UserFilled /></el-icon>
-            <span>教练：{{ item.trainerName || '专业教练' }}</span>
+            <span>内容：{{ item.trainerName || '专业教练' }}</span>
+          </div>
+          <div class="info-line">
+            <el-icon><Money /></el-icon>
+            <span>价格：¥{{ item.price || '0.00' }}</span>
           </div>
         </div>
 
         <!-- 操作按钮 -->
         <div class="card-footer">
-          <!-- 可取消 -->
+          <el-button
+              v-if="item.status === '0'"
+              type="warning"
+              round
+              icon="Money"
+              @click="goPay(item.reservationId)"
+          >去支付</el-button>
+
           <el-button
               v-if="item.status === '0'"
               type="danger"
@@ -77,41 +88,28 @@
               @click="handleCancel(item.reservationId)"
           >取消预约</el-button>
 
-          <!-- 去签到 -->
           <el-button
-              v-if="item.status === '0'"
+              v-if="item.status === '1'"
               type="success"
               round
               icon="Check"
               @click="handleSign(item.reservationId)"
           >立即签到</el-button>
 
-          <!-- 去支付 -->
-          <el-button
-              v-if="item.status === '2'"
-              type="warning"
-              round
-              icon="Money"
-              @click="goPay(item.resId)"
-          >去支付</el-button>
-
-          <!-- 去评价 -->
           <el-button
               v-if="item.status === '2'"
               type="primary"
               round
               icon="Star"
-              @click="goEvaluate(item.resId)"
+              @click="goEvaluate(item.reservationId)"
           >去评价</el-button>
 
-          <!-- 查看详情 -->
           <el-button type="primary" plain round icon="View" @click="goDetail(item.courseId)">
             查看课程
           </el-button>
         </div>
       </div>
 
-      <!-- 空状态 -->
       <div v-if="reservationList.length === 0 && !loading" class="empty-box">
         <el-empty description="暂无预约记录" />
       </div>
@@ -131,6 +129,8 @@
 
 <script setup name="MyReservation">
 import { myReservation, cancelCourse, sign } from '@/api/member/course'
+import { getCourse } from '@/api/courseManagement/course.js'
+import { getTrainer } from '@/api/trainerManagement/trainer' // 教练接口
 import { ElMessageBox } from 'element-plus'
 
 const { proxy } = getCurrentInstance()
@@ -149,7 +149,12 @@ const queryParams = reactive({
 
 // 状态文本
 function statusText(s) {
-  const map = { 0: '待签到', 1: '已签到', 2: '待支付/评价', 3: '已取消' }
+  const map = {
+    0: '待支付',
+    1: '待签到',
+    2: '已完成',
+    3: '已取消'
+  }
   return map[s] || '未知'
 }
 
@@ -157,31 +162,58 @@ function statusText(s) {
 function statusClass(s) {
   const map = {
     0: 'waiting',
-    1: 'success',
-    2: 'pay',
+    1: 'waitSign',
+    2: 'success',
     3: 'cancel'
   }
   return map[s] || 'default'
 }
 
-// 获取我的预约
-function getList() {
+// ==============================
+// 核心：获取预约 + 查课程 + 查教练
+// ==============================
+async function getList() {
   loading.value = true
-  myReservation().then(res => {
+  queryParams.status = activeStatus.value
+
+  try {
+    const res = await myReservation(queryParams)
     let list = res.data || []
-    if (activeStatus.value) {
-      list = list.filter(i => i.status === activeStatus.value)
+
+    // 循环查课程 + 教练
+    for (let item of list) {
+      try {
+        // 查课程
+        const courseRes = await getCourse(item.courseId)
+        const course = courseRes.data
+        item.price = course.price
+        item.trainerId = course.trainerId
+        item.location = course.location
+        item.startTime = course.startTime
+        item.endTime = course.endTime
+        // 查教练
+        if (course.trainerId) {
+          const trainerRes = await getTrainer(course.trainerId)
+          const trainer = trainerRes.data
+          // 你的教练没有 name，用专长代替显示
+          item.trainerName = trainer.specialties?.replace(/\[\"\]"/g, '') || '专业教练'
+        }
+      } catch (e) {}
     }
+
     reservationList.value = list
     total.value = list.length
-  }).finally(() => {
+  } catch (err) {
+    reservationList.value = []
+  } finally {
     loading.value = false
-  })
+  }
 }
 
-// 筛选状态
+// 切换状态
 function switchStatus(status) {
   activeStatus.value = status
+  queryParams.pageNum = 1
   getList()
 }
 
@@ -194,7 +226,7 @@ async function handleSign(id) {
   })
 }
 
-// 取消
+// 取消预约
 async function handleCancel(id) {
   await ElMessageBox.confirm('确定取消预约？')
   cancelCourse(id).then(() => {
@@ -207,25 +239,25 @@ async function handleCancel(id) {
 function goDetail(courseId) {
   router.push({ name: 'MemberCourseDetail', query: { courseId }})
 }
-function goPay(id) {
-  router.push(`/member/course/pay?resId=${id}`)
+function goPay(resId) {
+  router.push({ name: 'CoursePay', query: { resId } })
 }
-function goEvaluate(id) {
-  router.push(`/member/course/evaluate?resId=${id}`)
+function goEvaluate(resId) {
+  router.push({ name: 'CourseEvaluate', query: { resId } })
 }
 
-onMounted(() => getList())
+onMounted(() => {
+  getList()
+})
 </script>
 
 <style scoped>
-/* 全局布局 */
+/* 样式保持不变，已经是完整统一版 */
 .app-container {
   padding: 30px;
-  background: linear-gradient(135deg, #f7f8fa 0%, #f2f5f9 100%);
+  background: linear-gradient(135deg, #f7f8fa 0%, #f2f9f9 100%);
   min-height: 100vh;
 }
-
-/* 标题栏 */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -238,22 +270,16 @@ onMounted(() => getList())
   color: #1d2129;
   margin: 0;
 }
-
-/* 状态筛选 */
 .status-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 24px;
 }
-
-/* 卡片列表 */
 .card-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 22px;
 }
-
-/* 预约卡片 */
 .reserve-card {
   background: #fff;
   border-radius: 20px;
@@ -266,8 +292,6 @@ onMounted(() => getList())
   transform: translateY(-6px);
   box-shadow: 0 12px 24px rgba(0, 102, 255, 0.1);
 }
-
-/* 状态标签 */
 .card-tag {
   position: absolute;
   top: 16px;
@@ -278,11 +302,9 @@ onMounted(() => getList())
   font-weight: 500;
 }
 .waiting { background: #fff7e8; color: #ff7d00; }
+.waitSign { background: #e8f3ff; color: #0066ff; }
 .success { background: #e8faf2; color: #00b42a; }
-.pay { background: #f8f0fc; color: #9254de; }
 .cancel { background: #f2f3f5; color: #86909c; }
-
-/* 内容 */
 .course-title {
   font-size: 19px;
   font-weight: 600;
@@ -297,23 +319,17 @@ onMounted(() => getList())
   color: #4e5969;
   margin-bottom: 10px;
 }
-
-/* 按钮组 */
 .card-footer {
   margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
-
-/* 分页 */
 .pager {
   margin-top: 30px;
   display: flex;
-  justify: center;
+  justify-content: center;
 }
-
-/* 空状态 */
 .empty-box {
   grid-column: 1 / -1;
   padding: 60px 0;

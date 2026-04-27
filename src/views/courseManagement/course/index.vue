@@ -198,21 +198,24 @@
           <el-input v-model="form.trainerId" placeholder="请输入教练ID" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker clearable
-            v-model="form.startTime"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择开始时间">
-          </el-date-picker>
+          <el-date-picker
+              v-model="form.startTime"
+              type="datetime"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm"
+              placeholder="选择开始时间"
+          />
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker clearable
-            v-model="form.endTime"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择结束时间">
-          </el-date-picker>
+          <el-date-picker
+              v-model="form.endTime"
+              type="datetime"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm"
+              placeholder="选择结束时间"
+          />
         </el-form-item>
+
         <el-form-item label="地点" prop="location">
           <el-input v-model="form.location" placeholder="请输入地点" />
         </el-form-item>

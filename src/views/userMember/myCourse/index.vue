@@ -1,6 +1,12 @@
 <template>
   <div class="app-container">
-    <!-- 顶部搜索栏 -->
+    <!-- 顶部标题栏（和主页统一） -->
+    <div class="page-header">
+      <h1 class="main-title">课程预约中心</h1>
+      <el-button type="primary" round icon="Refresh" @click="handleQuery">刷新</el-button>
+    </div>
+
+    <!-- 搜索栏 -->
     <div class="search-bar">
       <el-input
           v-model="queryParams.courseName"
@@ -40,18 +46,16 @@
       </el-select>
     </div>
 
-    <!-- 卡片式课程列表 -->
-    <div v-loading="loading" class="card-grid">
+    <!-- 卡片式课程列表（和主页统一风格） -->
+    <div v-loading="loading" class="card-list">
       <div
           v-for="course in courseList"
           :key="course.courseId"
-          class="course-card"
+          class="reserve-card"
       >
-        <!-- 卡片头部 -->
-        <div class="card-header">
-          <div class="card-tag" :class="getCourseTagClass(course)">
-            {{ getCourseStatusText(course) }}
-          </div>
+        <!-- 状态标签 -->
+        <div class="card-tag" :class="getCourseTagClass(course)">
+          {{ getCourseStatusText(course) }}
         </div>
 
         <!-- 卡片内容 -->
@@ -77,6 +81,10 @@
             <el-icon><User /></el-icon>
             <span>{{ course.currentEnrollment || 0 }}/{{ course.maxCapacity || 0 }}人</span>
           </div>
+          <div class="info-line">
+            <el-icon><Money /></el-icon>
+            <span>¥{{ course.price || '0.00' }}</span>
+          </div>
         </div>
 
         <!-- 卡片底部按钮 -->
@@ -89,7 +97,6 @@
               @click="handleView(course)"
           >查看</el-button>
 
-          <!-- 1. 未预约 → 立即预约 -->
           <el-button
               v-if="isCanReserve(course)"
               type="success"
@@ -98,7 +105,6 @@
               @click="handleReserve(course)"
           >立即预约</el-button>
 
-          <!-- 2. 已预约 → 待支付 -->
           <el-button
               v-if="isWaitPay(course)"
               type="warning"
@@ -107,7 +113,6 @@
               @click="goPay(course)"
           >去支付</el-button>
 
-          <!-- 3. 已支付 → 去签到 + 可评价 -->
           <el-button
               v-if="isWaitSign(course)"
               type="success"
@@ -124,6 +129,11 @@
               @click="goEvaluate(course)"
           >去评价</el-button>
         </div>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-if="courseList.length === 0 && !loading" class="empty-box">
+        <el-empty description="暂无课程" />
       </div>
     </div>
 
@@ -179,7 +189,7 @@ const open = ref(false)
 const data = reactive({
   queryParams: {
     pageNum: 1,
-    pageSize: 8,
+    pageSize: 12,
     courseName: null,
     trainerId: null,
     startTime: null,
@@ -211,23 +221,16 @@ function getList() {
   })
 }
 
-// ================= 状态判断（按你新业务写的） =================
-// 未预约 → 可预约
+// ================= 状态判断 =================
 function isCanReserve(course) {
   return !course.reservation && course.status === '0'
 }
-
-// 已预约 → 待支付（0）
 function isWaitPay(course) {
   return course.reservation && course.resStatus === '0'
 }
-
-// 已支付 → 待签到（1）
 function isWaitSign(course) {
   return course.reservation && course.resStatus === '1'
 }
-
-// 可评价：只要支付完就能评价（1 或 2）
 function isCanEvaluate(course) {
   return course.reservation && ['1', '2'].includes(course.resStatus)
 }
@@ -235,8 +238,8 @@ function isCanEvaluate(course) {
 // 标签样式
 function getCourseTagClass(course) {
   if (isCanReserve(course)) return 'can'
-  if (isWaitPay(course)) return 'waitPay'
-  if (isWaitSign(course)) return 'waitSign'
+  if (isWaitPay(course)) return 'waiting'
+  if (isWaitSign(course)) return 'success'
   return 'full'
 }
 
@@ -256,7 +259,7 @@ function handleQuery() {
 
 function resetQuery() {
   data.queryParams = {
-    pageNum: 1, pageSize: 8,
+    pageNum: 1, pageSize: 12,
     courseName: null, trainerId: null,
     startTime: null, status: "0"
   }
@@ -307,12 +310,28 @@ getList()
 </script>
 
 <style scoped>
-/* 样式不变，保持你原来的高端风格 */
+/* 完全和主页（我的预约）统一风格 */
 .app-container {
   padding: 30px;
   background: linear-gradient(135deg, #f7f8fa 0%, #f2f5f9 100%);
   min-height: 100vh;
 }
+
+/* 标题栏 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.main-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d2129;
+  margin: 0;
+}
+
+/* 搜索 + 筛选 */
 .search-bar {
   display: flex;
   gap: 12px;
@@ -326,43 +345,86 @@ getList()
   margin-bottom: 24px;
 }
 .filter-item { width: 180px; }
-.card-grid {
+
+/* 卡片列表（和主页完全一样） */
+.card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 22px;
 }
-.course-card {
+
+/* 卡片样式（和主页统一） */
+.reserve-card {
   background: #fff;
   border-radius: 20px;
-  overflow: hidden;
+  padding: 24px;
+  position: relative;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  transition: 0.3s;
 }
-.course-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 102, 255, 0.12);
+.reserve-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 102, 255, 0.1);
 }
-.card-header { padding: 12px 16px; }
+
+/* 状态标签（和主页配色统一） */
 .card-tag {
-  display: inline-block;
+  position: absolute;
+  top: 16px;
+  right: 16px;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
 }
+.can { background: #e8faf2; color: #00b42a; }
+.waiting { background: #fff7e8; color: #ff7d00; }
+.success { background: #e8faf2; color: #00b42a; }
+.full { background: #fff1f0; color: #f53f3f; }
 
-/* 状态标签颜色 */
-.card-tag.can { background: #e8faf2; color: #00b42a; }
-.card-tag.waitPay { background: #fff7e8; color: #ff7d00; }
-.card-tag.waitSign { background: #e8f3ff; color: #0066ff; }
-.card-tag.full { background: #fff1f0; color: #f53f3f; }
+/* 内容 */
+.course-title {
+  font-size: 19px;
+  font-weight: 600;
+  color: #1d2129;
+  margin: 0 0 16px 0;
+}
+.course-tags {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 6px;
+}
+.info-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4e5969;
+  margin-bottom: 10px;
+}
 
-.card-body { padding: 0 20px 16px 20px; }
-.course-title { font-size: 18px; font-weight: 600; color: #1d2129; margin: 0 0 10px 0; }
-.course-tags { margin-bottom: 16px; display: flex; gap: 6px; }
-.info-line { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4e5969; margin-bottom: 8px; }
-.card-footer { padding: 16px 20px; border-top: 1px solid #f2f3f5; display: flex; flex-wrap: wrap; gap: 8px; }
-.pager { margin-top: 30px; display: flex; justify-content: center; }
+/* 按钮组 */
+.card-footer {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 分页 */
+.pager {
+  margin-top: 30px;
+  display: flex;
+  justify: center;
+}
+
+/* 空状态 */
+.empty-box {
+  grid-column: 1 / -1;
+  padding: 60px 0;
+}
+
+/* 弹窗 */
 .dialog-content { padding: 10px 20px; }
 .dialog-item { margin-bottom: 16px; font-size: 15px; }
 .dialog-item label { font-weight: 500; color: #333; margin-right: 8px; }

@@ -1,11 +1,21 @@
 import request from '@/utils/request'
 
+
+
 // 查询会员管理列表
 export function listMember(query) {
   return request({
     url: '/memberManagement/member/list',
     method: 'get',
     params: query
+  })
+}
+
+// 查找自己（会员用）
+export function getMe(){
+  return request({
+    url: 'memberManagement/member/me',
+    method:'get',
   })
 }
 

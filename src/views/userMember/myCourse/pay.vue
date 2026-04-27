@@ -30,7 +30,7 @@
 
           <div class="price-line">
             <span>实付金额</span>
-            <span class="price">¥99.00</span>
+            <span class="price">¥{{ courseInfo.price || 0.00 }}</span>
           </div>
 
           <div class="pay-type">
@@ -52,19 +52,33 @@
 
 <script setup name="CoursePay">
 import { payCourse } from '@/api/member/course'
+import { getCourse } from '@/api/courseManagement/course'
+import { getCourseReservation } from '@/api/courseManagement/courseReservation.js'
 const route = useRoute()
 const router = useRouter()
 const { proxy } = getCurrentInstance()
 
 const resId = route.query.resId
 const courseInfo = ref({})
+const courseReservationInfo = ref({})
 const payType = ref('BALANCE')
+const courseId = ref(null)
 
-onMounted(() => {
-  courseInfo.value = {
-    courseName: '精品健身课程',
-    startTime: new Date(),
-    location: '健身房训练区'
+onMounted(async () => {
+  try {
+    // 1. 先获取预约信息
+    const resRes = await getCourseReservation(resId)
+    courseReservationInfo.value = resRes.data
+
+    // 2. 拿到课程ID
+    courseId.value = courseReservationInfo.value.courseId
+
+    // 3. 再获取课程信息
+    const courseRes = await getCourse(courseId.value)
+    courseInfo.value = courseRes.data
+    console.log(courseInfo)
+  } catch (e) {
+    console.error("加载数据失败", e)
   }
 })
 

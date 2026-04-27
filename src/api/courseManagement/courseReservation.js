@@ -17,6 +17,14 @@ export function getCourseReservation(reservationId) {
   })
 }
 
+// 通过会员ID查询课程预约详细
+export function getCourseReservationByMemberId(memberId) {
+  return request({
+    url: '/courseManagement/courseReservation/getCourseReservationByMemberId' + memberId,
+    method: 'get'
+  })
+}
+
 // 新增课程预约
 export function addCourseReservation(data) {
   return request({
