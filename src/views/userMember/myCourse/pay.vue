@@ -30,7 +30,7 @@
 
           <div class="price-line">
             <span>实付金额</span>
-            <span class="price">¥{{ courseInfo.price || 0.00 }}</span>
+            <span class="price">¥{{ courseInfo.price * memberLevelInfo.discountRate || 0.00 }}</span>
           </div>
 
           <div class="pay-type">
@@ -38,6 +38,7 @@
             <el-radio-group v-model="payType" class="radio-group">
               <el-radio label="BALANCE">余额支付</el-radio>
               <el-radio label="WXPAY">微信支付</el-radio>
+              <el-radio label="ZFBPAY">支付宝支付</el-radio>
             </el-radio-group>
           </div>
 
@@ -53,7 +54,9 @@
 <script setup name="CoursePay">
 import { payCourse } from '@/api/member/course'
 import { getCourse } from '@/api/courseManagement/course'
-import { getCourseReservation } from '@/api/courseManagement/courseReservation.js'
+import { getMe } from '@/api/memberManagement/member'
+import { getCourseReservation, updateCourseReservation } from '@/api/courseManagement/courseReservation'
+import { getMamberLevel } from '@/api/memberManagement/mamberLevel'
 const route = useRoute()
 const router = useRouter()
 const { proxy } = getCurrentInstance()
@@ -63,9 +66,15 @@ const courseInfo = ref({})
 const courseReservationInfo = ref({})
 const payType = ref('BALANCE')
 const courseId = ref(null)
+const me = ref({})
+const memberLevelInfo = ref({})
 
 onMounted(async () => {
   try {
+    const memberMe = await getMe()
+    me.value = memberMe.data
+    memberLevelInfo.value = (await getMamberLevel(me.value.memberLevelId)).data
+
     // 1. 先获取预约信息
     const resRes = await getCourseReservation(resId)
     courseReservationInfo.value = resRes.data
@@ -83,7 +92,15 @@ onMounted(async () => {
 })
 
 async function doPay() {
-  await payCourse({ reservationId: resId, amount: 99, payType: payType.value })
+  await payCourse({
+    memberId: courseReservationInfo.value.memberId,
+    courseId: courseReservationInfo.value.courseId,
+    amount: courseInfo.value.price * memberLevelInfo.value.discountRate,
+    paymentMethod: payType.value,
+    status: 1,
+  })
+  courseReservationInfo.value.status = 1
+  await updateCourseReservation(courseReservationInfo.value)
   proxy.$modal.msgSuccess('支付成功')
   router.push({ name: 'CourseEvaluate', query: { resId } })
 }

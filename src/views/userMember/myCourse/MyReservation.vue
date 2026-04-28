@@ -191,6 +191,7 @@ async function getList() {
         item.location = course.location
         item.startTime = course.startTime
         item.endTime = course.endTime
+        item.courseName = course.courseName
         // 查教练
         if (course.trainerId) {
           const trainerRes = await getTrainer(course.trainerId)

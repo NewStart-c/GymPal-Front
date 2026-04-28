@@ -82,7 +82,7 @@ async function submit() {
   await addEvaluation({
     trainerId:courseInfo.value.trainerId,
     memberId:courseReservationInfo.value.memberId,
-    score:trainerScore,
+    score:trainerScore.value,
     comment: content.value
   })
 

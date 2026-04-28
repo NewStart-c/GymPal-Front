@@ -6,8 +6,8 @@ export function memberReserve(data) {
 }
 
 // 我的预约
-export function myReservation() {
-  return request({ url: '/courseManagement/courseReservation/myList', method: 'get' })
+export function myReservation(query) {
+  return request({ url: '/courseManagement/courseReservation/myList', method: 'post', data:query })
 }
 
 // 签到
@@ -38,9 +38,9 @@ export function reserveCourse(data) {
 
 
 // 取消预约
-export function cancelCourse(id) {
+export function cancelCourse(reservationId) {
   return request({
-    url: '/courseReservation/cancel/' + id,
+    url: '/courseManagement/courseReservation/cancel/' + reservationId,
     method: 'post'
   })
 }

@@ -46,7 +46,7 @@
       </el-select>
     </div>
 
-    <!-- 卡片式课程列表（和主页统一风格） -->
+    <!-- 卡片式课程列表 -->
     <div v-loading="loading" class="card-list">
       <div
           v-for="course in courseList"
@@ -198,6 +198,9 @@ const data = reactive({
   reserveForm: {}
 })
 const { queryParams, reserveForm } = toRefs(data)
+const query = reactive({
+  status: ''
+})
 
 // 获取列表
 function getList() {
@@ -206,7 +209,7 @@ function getList() {
     courseList.value = courseRes.rows || []
     total.value = courseRes.total || 0
 
-    const myResRes = await myReservation().catch(() => ({ data: [] }))
+    const myResRes = await myReservation(query).catch(() => ({ data: [] }))
     const myResList = myResRes.data || []
     const resMap = new Map(myResList.map(i => [i.courseId, i]))
 
