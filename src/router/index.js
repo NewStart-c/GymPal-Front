@@ -104,6 +104,8 @@ export const constantRoutes = [
     redirect: '/courseManagement/course',
     name: 'CourseManagement',
     meta: { title: '课程管理', icon: 'education' },
+    hidden: true, // 隐藏，不出现在左侧菜单
+
     children: [
 
       // 新增课程详情路由
@@ -128,14 +130,15 @@ export const constantRoutes = [
     path: '/userMember',
     component: Layout,
     meta: { title: '会员中心' },
+    hidden: true, // 隐藏，不出现在左侧菜单
     children: [
       // 课程列表
-      {
-        path: 'myCourse',
-        name: 'MyCourse',
-        component: () => import('@/views/userMember/myCourse/index'),
-        meta: { title: '我的课程' }
-      },
+      // {
+      //   path: 'myCourse',
+      //   name: 'MyCourse',
+      //   component: () => import('@/views/userMember/myCourse/index'),
+      //   meta: { title: '我的课程' }
+      // },
 
       {
         path: 'myCourse/detail',
