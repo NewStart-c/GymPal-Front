@@ -56,6 +56,9 @@
         <el-form-item label="最大容量" prop="maxCapacity">
           <el-input v-model="addForm.maxCapacity" type="number" placeholder="人数上限" />
         </el-form-item>
+        <el-form-item label="价格" prop="maxCapacity">
+          <el-input v-model="addForm.price" type="number" placeholder="原价价格" />
+        </el-form-item>
       </el-form>
 
       <template #footer>
@@ -88,6 +91,7 @@ const addForm = ref({
   courseType: '',
   startTime: '',
   location: '',
+  price: '',
   trainerId: trainerId.value,
   maxCapacity: 10,
   currentEnrollment: 0,
