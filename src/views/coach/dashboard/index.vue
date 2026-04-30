@@ -72,7 +72,9 @@ const data = ref({
 
 onMounted(() => {
   coachDashboard().then(res => {
-    data.value = res.data
+    data.value.courseCount = res.courseCount
+    data.value.reservationCount = res.reservationCount
+    data.value.scoreAvg = res.scoreAvg
   })
 })
 </script>

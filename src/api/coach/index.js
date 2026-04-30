@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function getTrainerId(){
+    return request({
+        url: '/coach/trainerID',
+        method: 'get'
+    })
+}
+
 // 教练工作台
 export function coachDashboard() {
     return request({
