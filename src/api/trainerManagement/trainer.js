@@ -42,3 +42,11 @@ export function delTrainer(trainerId) {
     method: 'delete'
   })
 }
+
+// 查询教练员工信息
+export function selectTranierUserInfo(employeeId){
+  return request({
+    url: '/trainerManagement/trainer/profile/' + employeeId,
+    method: 'get'
+  })
+}

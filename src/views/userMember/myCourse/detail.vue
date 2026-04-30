@@ -125,8 +125,9 @@
 
 <script setup name="MemberCourseDetail">
 import { getCourse } from "@/api/courseManagement/course"
-import { getTrainer } from "@/api/trainerManagement/trainer"
+import { getTrainer, selectTranierUserInfo } from "@/api/trainerManagement/trainer"
 import { listEvaluation } from "@/api/trainerManagement/evaluation"
+import { getUser } from "@/api/system/user"
 
 const { proxy } = getCurrentInstance()
 const route = useRoute()
@@ -138,6 +139,8 @@ const trainerInfo = ref({})
 const evaluationList = ref([])
 const evaluationTotal = ref(0)
 const trainerAvgScore = ref(0)
+
+const user = ref({})
 
 onMounted(() => {
   getCourseDetail()
@@ -153,10 +156,16 @@ function getCourseDetail() {
   })
 }
 
-function getTrainerInfo(trainerId) {
-  getTrainer(trainerId).then(res => {
+async function getTrainerInfo(trainerId) {
+  await getTrainer(trainerId).then(res => {
     trainerInfo.value = { ...res.data, trainerName: res.data.employeeName || '教练' }
   })
+  await selectTranierUserInfo(trainerInfo.value.employeeId).then(res =>{
+    user.value = res.data
+  })
+  trainerInfo.value.trainerName = user.value.nickName
+
+  console.log(trainerInfo.value);
 }
 
 function getTrainerEvaluation(trainerId) {
