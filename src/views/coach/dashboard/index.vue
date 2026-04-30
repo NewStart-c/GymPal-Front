@@ -89,7 +89,10 @@ import * as echarts from 'echarts'
 const data = ref({
   courseCount: 0,
   reservationCount: 0,
-  scoreAvg: 0
+  scoreAvg: 0,
+  money: 0,
+  reservation7Days: [], // 7天数据
+  courseTypeData: []    // 类型统计
 })
 
 let trendChart = null
@@ -97,40 +100,43 @@ let pieChart = null
 
 onMounted(() => {
   coachDashboard().then(res => {
+    data.value.courseCount = res.data.courseCount
+    data.value.reservationCount = res.data.reservationCount
+    data.value.scoreAvg = res.data.scoreAvg
+    data.value.money = res.data.money
 
-    data.value.courseCount = res.courseCount
-    data.value.reservationCount = res.reservationCount
-    data.value.scoreAvg = res.scoreAvg
-    data.value.money = res.money
-
+    data.value.reservation7Days = res.data.reservation7Days
+    data.value.courseTypeData = res.data.courseTypeData
 
     initCharts()
   })
 })
 
-// 图表
 function initCharts() {
+  // 折线图
   trendChart = echarts.init(document.getElementById('trendChart'))
   trendChart.setOption({
-    xAxis: {type: 'category', data: ['7天前', '6天前', '5天前', '4天前', '3天前', '2天前', '今日']},
-    yAxis: {type: 'value'},
+    xAxis: {
+      type: 'category',
+      //data: ['7天前', '6天前', '5天前', '4天前', '3天前', '2天前', '今日']
+      data: ['今日', '2天前', '3天前', '4天前', '5天前', '6天前', '7天前']
+    },
+    yAxis: { type: 'value' },
     series: [{
       type: 'line',
       smooth: true,
-      data: [2, 3, 1, 4, 2, 5, data.value.courseCount || 0],
+      data: data.value.reservation7Days, // 👈 真数据
       color: '#4E73F5'
     }]
   })
 
+  // 饼图
   pieChart = echarts.init(document.getElementById('pieChart'))
   pieChart.setOption({
     series: [{
       type: 'pie',
       radius: ['40%', '70%'],
-      data: [
-        {value: data.value.courseCount || 0, name: '课程数'},
-        {value: data.value.reservationCount || 0, name: '预约数'},
-      ]
+      data: data.value.courseTypeData // 👈 真数据
     }]
   })
 }
