@@ -13,7 +13,7 @@
       <div class="stat-card blue">
         <div class="icon">📚</div>
         <div class="info">
-          <p class="label">今日课程</p>
+          <p class="label">课程数量</p>
           <p class="num">{{ data.courseCount || 0 }}</p>
         </div>
       </div>
@@ -133,10 +133,29 @@ function initCharts() {
   // 饼图
   pieChart = echarts.init(document.getElementById('pieChart'))
   pieChart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c}人 ({d}%)'
+    },
+    // legend: {
+    //   orient: 'vertical',
+    //   left: 'left',
+    //   // 强制显示所有name，即使value为0
+    //   data: data.value.courseTypeData.map(item => item.name)
+    // },
     series: [{
       type: 'pie',
       radius: ['40%', '70%'],
-      data: data.value.courseTypeData // 👈 真数据
+      avoidLabelOverlap: false,
+      label: {
+        show: true,
+        formatter: '{b}: {c}'
+      },
+      labelLine: {
+        show: true
+      },
+      // 关键：过滤掉value=0的数据，避免影响显示
+      data: data.value.courseTypeData.filter(item => item.value > 0)
     }]
   })
 }

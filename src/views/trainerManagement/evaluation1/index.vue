@@ -147,7 +147,7 @@
   </div>
 </template>
 
-<script setup name="Evaluation">
+<script setup name="Evaluation1">
 import { listEvaluation, getEvaluation, delEvaluation, addEvaluation, updateEvaluation } from "@/api/trainerManagement/evaluation"
 
 const { proxy } = getCurrentInstance()
