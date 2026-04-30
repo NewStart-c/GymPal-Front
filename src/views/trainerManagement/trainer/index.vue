@@ -84,9 +84,6 @@
     <!-- 添加或修改教练管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="trainerRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="员工ID" prop="employeeId">
-          <el-input v-model="form.employeeId" placeholder="请输入员工ID" />
-        </el-form-item>
         <el-form-item label="专长(JSON格式)" prop="specialties">
           <el-input v-model="form.specialties" type="textarea" placeholder="请输入内容" />
         </el-form-item>
@@ -130,14 +127,13 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    employeeId: null,
     specialties: null,
     experience: null,
     imageUrls: null
   },
   rules: {
     employeeId: [
-      { required: true, message: "员工ID不能为空", trigger: "blur" }
+      // { required: true, message: "员工ID不能为空", trigger: "blur" }
     ],
   }
 })
